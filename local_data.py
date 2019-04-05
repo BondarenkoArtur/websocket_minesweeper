@@ -6,12 +6,15 @@ counts_data_array = {}
 
 current_map_info = {}
 current_map_item_info = []
+current_map_all_item_info = {}
 previous_item_info = []
 
 items_data_array = {}
 battles_data_array = {}
 
 battles_full_data_array = {}
+
+enhancements_array = {}
 
 bot_on = [0]
 
