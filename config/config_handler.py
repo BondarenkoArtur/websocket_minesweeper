@@ -4,7 +4,8 @@ from enum import Enum
 
 
 class ConfigHandler:
-    default_settings = {'UI': 'tui'}
+    default_settings = {'UI': 'cli',
+                        'FPS': 50}
 
     def __init__(self):
         self.settings = None

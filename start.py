@@ -1,3 +1,5 @@
+import time
+
 from config.config_handler import ConfigHandler, UI
 from network.network_handler import NetworkHandler
 
@@ -7,19 +9,19 @@ if __name__ == '__main__':
     config = ConfigHandler()
     ui_setting = config.get_setting('UI')
 
-    if ui_setting == UI.CLI:
+    if ui_setting == UI.CLI.value:
 
         from ui.cli import CLIHandler
 
         ui = CLIHandler()
 
-    elif ui_setting == UI.TUI:
+    elif ui_setting == UI.TUI.value:
 
         from ui.tui import TUIHandler
 
         ui = TUIHandler()
 
-    elif ui_setting == UI.GUI:
+    elif ui_setting == UI.GUI.value:
 
         from ui.gui import GUIHandler
 
@@ -27,3 +29,12 @@ if __name__ == '__main__':
 
     else:
         raise Exception("Unknown UI selected")
+
+    network.set_listener(ui.get_listener())
+
+    fps = config.get_setting('FPS')
+    if fps != 0:
+        fps = 1 / fps
+
+    while ui.is_running():
+        time.sleep(fps)
