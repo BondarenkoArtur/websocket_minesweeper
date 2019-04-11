@@ -64,8 +64,7 @@ def new_parse_message(message):
                 if data['id'] in msg_array:
                     if msg_array[data['id']]['method'] == 'system.version':
                         # login with google play id
-                        g_id = "g08745036216621216599"
-                        # g_id = "g15649493212719029158"
+                        g_id = "g09876543210123456789"
                         simulate_m_request("login", {"name": "",
                                                      "key": generate_key(g_id),
                                                      "id": g_id,
@@ -91,9 +90,15 @@ def new_parse_message(message):
                         simulate_sub_request("notifications.my")
                         simulate_sub_request("user_effects.my")
                         simulate_sub_request("battle.list")
-                        simulate_m_request("user.division", {"range": 1})
+                        # range 1 for top users
+                        # range 0 for all 20 users in division
+                        simulate_m_request("user.division", {"range": 0})
                     elif msg_array[data['id']]['method'] == 'user.division':
                         if 'result' in data:
+                            if type(data['result']) == bool and \
+                                            data['result'] == False:
+                                # Result might be False for a new user
+                                simulate_m_request("system.deployment")
                             if 'players' in data['result']:
                                 counts_data_array['division'] = \
                                     data['result']['players']
@@ -161,7 +166,7 @@ def new_parse_message(message):
                                     # do nothing, it's success
                                     pass
                                 else:
-                                    # todo check is false possible
+                                    # todo false possible !!!!
                                     unknown_error(136, message)
                             else:
                                 unknown_error(135, message)
@@ -465,6 +470,9 @@ def append_element(elem):
         sweeper_map[elem[0]][elem[1]] = item_id
     else:
         sweeper_map[elem[0]][elem[1]] = elem[2]
+    if len(elem) == 4:
+        # todo parse user, who changed cell
+        pass
 
 def process_item(elem):
     current_map_all_item_info["%d,%d" % (elem[0], elem[1])] = elem[2]
@@ -480,6 +488,18 @@ def process_item(elem):
                     pick_on_map(elem[0], elem[1])
                     return -9
         elif mine not in current_map_item_info:
+            if 'key' in elem[2] and ('live' in elem[2]['key'] or 'element@gold_tooth' in elem[2]['key'] or 'element@gem' in elem[2]['key'] or 'gem' in elem[2]['key']):
+                pass
+            # todo on 'slot_key@gold@red' or any other slot_key refresh user inventory to get all new slots
+            # {'id': 'm23680', 'msg': 'result'}
+            # {'collection': 'user_items',
+            #  'fields': {'locked': False},
+            #  'id': 'Cn8St6pEGN23KiGiW',
+            #  'msg': 'changed'}
+            # {'methods': ['m23680'], 'msg': 'updated'}
+            else:
+                print(elem[2])
+                pass
             current_map_item_info.append(mine)
             # todo add check is auto pick up
             pick_on_map(elem[0], elem[1])
@@ -656,6 +676,7 @@ def get_available_gem_space(map_item):
     slots = [key for key, value in items_data_array.items() if
            key_find[0:3] in key]
     if len(slots) > 0:
+        # todo add check is item not upgrading
         min_value = items_data_array[slots[0]][2]
         min_element = slots[0]
         for slot in slots:

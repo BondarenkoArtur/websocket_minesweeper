@@ -1,8 +1,12 @@
+"""Module is needed to exporting map to an image"""
+
 from PIL import Image
 
 from local_data import sweeper_map
 
 def export_image(filename):
+    """Function is needed to export map to an image"""
+    # todo replace hardcoded size 2000x2000
     img = Image.new('RGB', (2000, 2000), "white")  # <--
     # OR  Image.new('RGB', img1.size, "white")
     cmap = {-10: (255, 255, 255),
@@ -31,4 +35,3 @@ def export_image(filename):
     img.putdata(data)
     # img.show()
     img.save(filename)
-
