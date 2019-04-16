@@ -30,7 +30,9 @@ if __name__ == '__main__':
     else:
         raise Exception("Unknown UI selected")
 
-    network.set_listener(ui.get_listener())
+    network.set_ui_listener(ui.get_listener())
+    network.set_google_id(config.get_setting('g_id'))
+    network.set_name(config.get_setting('name'))
 
     fps = config.get_setting('FPS')
     if fps != 0:

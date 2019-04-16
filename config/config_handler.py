@@ -5,7 +5,9 @@ from enum import Enum
 
 class ConfigHandler:
     default_settings = {'UI': 'cli',
-                        'FPS': 50}
+                        'FPS': 50,
+                        'g_id': 'g09876543210123456789',
+                        'name': '09876543210123'}
 
     def __init__(self):
         self.settings = None

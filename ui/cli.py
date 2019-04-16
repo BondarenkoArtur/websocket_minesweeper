@@ -10,8 +10,8 @@ class CLIHandler(UIHandler):
         return self.listener
 
     @staticmethod
-    def print(message):
-        print(message)
+    def print(*args):
+        print(*args)
 
     def is_running(self):
         return True

@@ -3,13 +3,18 @@ class UpdateListener:
         pass
 
     def on_error(self, error):
-        raise NotImplementedError
+        raise NotImplementedError("Subclass should implement on_error")
 
     def on_message(self, message):
-        raise NotImplementedError
+        raise NotImplementedError("Subclass should implement on_message")
+
+    def on_send(self, message):
+        raise NotImplementedError("Subclass should implement on_send")
 
     def on_connection_opened(self):
-        raise NotImplementedError
+        raise NotImplementedError("Subclass should implement "
+                                  "on_connection_opened")
 
     def on_connection_closed(self):
-        raise NotImplementedError
+        raise NotImplementedError("Subclass should implement "
+                                  "on_connection_closed")
