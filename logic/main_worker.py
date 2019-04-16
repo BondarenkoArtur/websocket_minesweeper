@@ -39,6 +39,27 @@ class Worker:
         self.data.add_msg(string_id, request)
         self.init_request(string_id)
 
+    def simulate_sub_request(self, method, params=None):
+        self.sub_id += 1
+        string_id = "s%d" % self.sub_id
+        if params is None:
+            request = {"id": string_id,
+                       "name": method,
+                       "params": [],
+                       "msg": "sub"}
+        else:
+            request = {"id": string_id,
+                       "name": method,
+                       "params": [params],
+                       "msg": "sub"}
+        self.data.add_sub(string_id, request)
+        self.socket.send(json.dumps(request))
+
+    def simulate_unsub_request(self, sub_string_id):
+        request = {"id": sub_string_id,
+                   "msg": "unsub"}
+        self.socket.send(json.dumps(request))
+
     def login_with_google_play_id(self):
         if self.google_id is not None:
             self.simulate_m_request(Commands.LOGIN,
@@ -103,3 +124,66 @@ class Worker:
 
     def set_name(self, param):
         self.name = param
+
+    def add_to_collection(self, key, key_id, data):
+        self.data.set_collection_data(key, key_id, data)
+
+    def on_login_response(self, response):
+        self.data.set_global_data('id', response['id'])
+        self.data.set_global_data('token', response['token'])
+        self.data.set_global_data('tokenExpires', response['tokenExpires'])
+        self.simulate_m_request(Commands.SYSTEM_CONFIGURATION)
+
+    def on_system_configuration_response(self, response):
+        self.data.set_global_data('time', response['time'])
+        self.data.set_global_data('config', response['config'])
+        self.start_subscriptions()
+        self.simulate_m_request(Commands.USER_DIVISION, {"range": 0})
+
+    def on_user_division_response(self, response):
+        if type(response) == bool and response == False:
+            self.simulate_m_request(Commands.SYSTEM_DEPLOYMENT)
+        else:
+            players = sorted(response['players'],
+                             key=lambda kv: (kv['position']))
+            self.data.set_global_data('players', players)
+            self.data.set_global_data('divisionType', response['divisionType'])
+            self.simulate_m_request(Commands.SYSTEM_DEPLOYMENT)
+
+    def on_system_deployment_response(self, response):
+        self.data.set_global_data('deployments', response['value'])
+        self.simulate_m_request(Commands.USER_TOOTH_AVAILABLE)
+
+    def on_enhancements_my_response(self, response):
+        self.data.set_global_data('current', response['current'])
+        self.data.set_global_data('next', response['next'])
+
+    def on_user_tooth_available_response(self, response):
+        self.simulate_m_request(Commands.ENHANCEMENT_MY)
+
+    def get_gold_tooth(self):
+        self.simulate_m_request(Commands.USER_GET_ADV_BONUS, {"type": "tooth"})
+
+    def ready_subs(self, subs_list):
+        for sub in subs_list:
+            sub_elem = self.data.get_sub(sub)
+            if sub_elem is not None:
+                sub_elem['ready'] = True
+        pass
+
+    def start_subscriptions(self):
+        self.simulate_sub_request(Commands.USER_CURRENT,
+                                  params={"fields": ["lives",
+                                                     "liveCooldown",
+                                                     "workbench",
+                                                     "rank"]})
+
+        self.simulate_sub_request(Commands.USER_CURRENT,
+                                  params={"fields": ["money",
+                                                     "score"]})
+        self.simulate_sub_request(Commands.COUNTS)
+        self.simulate_sub_request(Commands.USER_ITEM_MY)
+        self.simulate_sub_request(Commands.USER_ELEMENTS_MY)
+        self.simulate_sub_request(Commands.NOTIFICATIONS_MY)
+        self.simulate_sub_request(Commands.USER_EFFECTS_MY)
+        self.simulate_sub_request(Commands.BATTLE_LIST)
